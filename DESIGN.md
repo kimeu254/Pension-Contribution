@@ -5,6 +5,80 @@ Working design for the "BC Pension Contributions Practical". It becomes the READ
 
 ---
 
+## 0. Task list (in order)
+
+Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
+
+**Step 0 – Project setup**
+- [x] AL project, `app.json` (IDs 50100–50149)
+- [x] Design document
+- [x] `.gitignore`
+- [x] Git repo + GitHub remote (`kimeu254/Pension-Contribution`), initial commit pushed
+
+**Step 1 – Master data (Part 1)**
+- [x] Enums: Member Status, Employer Status, Scheme Type
+- [x] Table shells: Pension Setup, Scheme, Employer, Member
+- [x] Fix naming: `PEN Scheme ` trailing space, Scheme `Primary Key` → `Code`, double spaces, `" Last Name"`
+- [x] Pension Setup: defaults (9 / 500 / 3), No. Series relations, value ranges
+- [x] Scheme: required fields, G/L account relations
+- [x] Employer: number series, KRA PIN format + uniqueness, email validation, Member Count FlowField
+- [x] Member: number series, required fields, unique National ID, age 18–65, scheme inherited, suspended/blocked check, salary > 0
+- [x] Enum Ledger Entry Type + table PEN Member Ledger Entry
+- [x] Member Balance FlowField + drill-down
+- [x] Pages: Setup, Schemes, Employer List/Card, Member List/Card, Member Ledger Entries
+- [x] Install codeunit: setup record + number series
+- [x] Permission set `PEN ALL`
+- [x] Compiles cleanly (CodeCop / UICop / PTE cop: only file-naming and namespace hints)
+- [ ] Verify acceptance criteria 1–3 in sandbox
+
+**Step 2 – Intake (Part 2)**
+- [ ] Enums: Queue Line Status, Batch Status, Intake Source
+- [ ] Tables: Contribution Batch, Contribution Queue
+- [ ] Intake codeunit (single entry point, structural checks, duplicate message ID, control total)
+- [ ] JSON reader
+- [ ] CSV reader (extra credit)
+- [ ] Pages: Contribution Batches, Batch card, Queue Lines; Import File action
+- [ ] Verify: sample loads, reload rejected, wrong control total rejected
+
+**Step 3 – Background processing (Part 3)**
+- [ ] Line validation codeunit (TryFunction) + `OnBeforeValidateQueueLine` event
+- [ ] Queue Processor: stale-claim recovery, retry sweep, claim/commit, per-line processing
+- [ ] Dead Letter after Max Retry Attempts
+- [ ] Reprocess action
+- [ ] Job Queue Entry setup + verify users can keep working
+
+**Step 4 – Posting (Part 4)**
+- [ ] Member ledger entries (2 per line, AutoIncrement Entry No.)
+- [ ] Summarised GL pair per scheme via Gen. Jnl.-Post Line
+- [ ] Late penalty once per batch
+- [ ] `OnAfterQueueLinePosted` event
+- [ ] Verify reconciliation: member ledger total = GL Member Liability credit
+
+**Step 5 – Member statement (Part 5)**
+- [ ] Date Filter on Member, report dataset
+- [ ] RDLC layout
+- [ ] Actions on Member Card and Member List
+- [ ] Verify: opening + contributions = closing; member with no entries still prints
+
+**Step 6 – Generator, tests (Part 6)**
+- [ ] Test data generator (1 scheme, 50 employers, 2,000 members, ~3% bad lines) + page action
+- [ ] Test app with 3–4 test scenarios
+
+**Step 7 – Stretch goals (optional)**
+- [ ] Queue monitor page
+- [ ] Telemetry (`Session.LogMessage`)
+- [ ] Performance at 20,000 lines (before/after timings)
+- [ ] API page intake
+- [ ] Parallel processing demo with two Job Queue entries
+
+**Step 8 – Deliverables**
+- [ ] README (from this document)
+- [ ] Compiled `.app`
+- [ ] Source zip / repo link
+- [ ] Walkthrough notes
+
+---
+
 ## 1. Architecture at a glance
 
 ```
@@ -250,7 +324,17 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 | GL summary granularity | one pair per scheme per processed chunk of a batch; with batch size 500 and ~40 lines per employer that is one pair per batch |
 | Retry semantics | "Failed more than Max Retry Attempts": Retry Count > Max → Dead Letter |
 | Reprocess | resets Retry Count to 0 |
-| Age rule | age computed on Date Joined, inclusive 18–65 |
+| Age rule | age computed on Date Joined, inclusive; limits held in Pension Setup (`Min. Joining Age` 18, `Max. Joining Age` 65) so they can change without a code change – documented in README "Additional fields" |
+| Date of Birth | made required, otherwise the 18–65 rule cannot be enforced |
 | Member Count | Active members only (per spec) |
+| Added fields | `No. Series` on Employer and Member (standard number series pattern), `Date Filter` FlowFilter on Member (statement opening/closing balance) |
+| Required fields | `NotBlank` stops blanking a field; `OnInsert`/`OnModify` checks catch records created from code; cards use `DelayedInsert` so the record is only inserted once filled in |
+| Uniqueness | KRA PIN and National ID checked in `OnValidate` (clear message) and backed by a `Unique` key (database guarantee) |
+| Member rules on insert | employer status / scheme blocked re-checked in `OnInsert`, so the generator, API and tests cannot bypass them |
+| Changing scheme / employer | an employer's scheme cannot change once it has members; a member's employer cannot change once they have ledger entries (keeps the ledger consistent) |
+| Deletes | scheme with employers, employer with members, member with ledger entries cannot be deleted |
+| Scheme G/L accounts | must be Posting type, not blocked, and Direct Posting (required by Gen. Jnl.-Post Line) |
+| Number series | created on install: `PEN-MEM` (MEM00001), `PEN-EMP` (EMP0001), `PEN-BATCH` (PCB000001); manual numbers allowed |
+| Late Penalty % default | 5% on install (brief gives no value; needed for the sample's late batch to post a penalty) |
 | Posting date | last day of the contribution period |
 | Tests | separate test app, IDs 50140–50149 |
