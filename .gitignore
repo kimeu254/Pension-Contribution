@@ -1,0 +1,22 @@
+# AL compiler output and downloaded symbols
+.alpackages/
+.snapshots/
+*.app
+rad.json
+*.g.xlf
+
+# Local environment / credentials
+.vscode/launch.json
+.altestrunner/
+*.flf
+*.bclicense
+
+# AL Language / analyzer caches
+.alcache/
+.output/
+*.alpackages.lock
+
+# OS and editor files
+Thumbs.db
+desktop.ini
+.DS_Store
