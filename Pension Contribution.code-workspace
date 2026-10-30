@@ -7,10 +7,6 @@
     {
       "name": "Pension Contribution Tests",
       "path": "test"
-    },
-    {
-      "name": "Repository root",
-      "path": "."
     }
   ],
   "settings": {
