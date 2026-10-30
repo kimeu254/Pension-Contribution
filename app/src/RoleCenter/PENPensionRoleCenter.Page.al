@@ -79,6 +79,13 @@ page 50112 "PEN Pension Role Center"
                     RunObject = page "Job Queue Entries";
                     ToolTip = 'View the background jobs, including the contribution queue processor.';
                 }
+                action(GenerateTestData)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Generate Test Data';
+                    RunObject = page "PEN Generate Test Data";
+                    ToolTip = 'Create a test scheme, employers, members and one contribution batch per employer for a period, including a few deliberately bad lines.';
+                }
             }
             group(MasterData)
             {
@@ -152,6 +159,17 @@ page 50112 "PEN Pension Role Center"
                 RunObject = page "PEN Member Card";
                 RunPageMode = Create;
                 ToolTip = 'Register a new scheme member.';
+            }
+        }
+        area(Processing)
+        {
+            action(GenerateTestDataAction)
+            {
+                ApplicationArea = All;
+                Caption = 'Generate Test Data';
+                Image = CreateDocuments;
+                RunObject = page "PEN Generate Test Data";
+                ToolTip = 'Create a test scheme, employers, members and one contribution batch per employer for a period, including a few deliberately bad lines.';
             }
         }
         area(Reporting)

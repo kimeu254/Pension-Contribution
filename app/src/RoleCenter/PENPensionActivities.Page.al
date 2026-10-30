@@ -63,6 +63,14 @@ page 50113 "PEN Pension Activities"
                         RunObject = page "PEN Pension Setup";
                         ToolTip = 'Set up number series, remittance rules, background processing and test data.';
                     }
+                    action(GenerateTestData)
+                    {
+                        ApplicationArea = All;
+                        Caption = 'Generate Test Data';
+                        Image = TileNew;
+                        RunObject = page "PEN Generate Test Data";
+                        ToolTip = 'Create a test scheme, employers, members and one contribution batch per employer for a period, including a few deliberately bad lines.';
+                    }
                 }
             }
             cuegroup(Batches)

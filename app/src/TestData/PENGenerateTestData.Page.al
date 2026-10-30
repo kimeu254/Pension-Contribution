@@ -52,15 +52,19 @@ page 50107 "PEN Generate Test Data"
             MembersPerEmployer := 40;
     end;
 
+    // The dialog runs the generator itself on OK, so any action can open it with a plain RunObject.
+    // An error (for example an invalid period) keeps the dialog open so the user can correct it.
+    trigger OnQueryClosePage(CloseAction: Action): Boolean
+    var
+        TestDataGenerator: Codeunit "PEN Test Data Generator";
+    begin
+        if CloseAction = Action::OK then
+            TestDataGenerator.Generate(Period, NoOfEmployers, MembersPerEmployer);
+        exit(true);
+    end;
+
     var
         Period: Code[7];
         NoOfEmployers: Integer;
         MembersPerEmployer: Integer;
-
-    procedure GetOptions(var NewPeriod: Code[7]; var NewNoOfEmployers: Integer; var NewMembersPerEmployer: Integer)
-    begin
-        NewPeriod := Period;
-        NewNoOfEmployers := NoOfEmployers;
-        NewMembersPerEmployer := MembersPerEmployer;
-    end;
 }
