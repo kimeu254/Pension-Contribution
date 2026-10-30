@@ -29,7 +29,7 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [x] Install codeunit: setup record + number series
 - [x] Permission set `PEN ALL`
 - [x] Compiles cleanly (CodeCop / UICop / PTE cop: only file-naming and namespace hints)
-- [ ] Verify acceptance criteria 1–3 in sandbox
+- [x] Verify acceptance criteria 1–3 in sandbox
 
 **Step 2 – Intake (Part 2)**
 - [x] Enums: Queue Line Status, Batch Status, Intake Source
@@ -39,7 +39,7 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [x] CSV reader (extra credit)
 - [x] Pages: Contribution Batches (with Import File action and line-count drill-downs), Contribution Queue
 - [x] Sample files in `samples/` (JSON, CSV, bad control total)
-- [ ] Verify: sample loads, reload rejected, wrong control total rejected
+- [x] Verify: sample loads, reload rejected, wrong control total rejected
 
 **Step 3 – Background processing (Part 3)**
 - [x] Line validation codeunit (TryFunction) + `OnBeforeValidateQueueLine` / `OnAfterValidateQueueLine` events
@@ -48,7 +48,7 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [x] Reprocess action
 - [x] Job Queue: "Schedule Background Processing" (setup page) and "Process Now" (batches / queue pages)
 - [x] Posting stub (`PEN Contribution Posting`) that fails on purpose until Step 4
-- [ ] Verify in sandbox: bad lines fail with their own error, retries → Dead Letter, Reprocess, users can keep working
+- [x] Verify in sandbox: bad lines fail with their own error, retries → Dead Letter, Reprocess, users can keep working
 
 **Step 4 – Posting (Part 4)**
 - [x] Member ledger entries (2 per line, AutoIncrement Entry No.)
@@ -56,13 +56,13 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [x] Late penalty once per batch
 - [x] `OnAfterQueueLinePosted` and `OnBeforePostGenJournalLine` events
 - [x] Batch page: Reconcile action, Member Ledger Entries / G/L Entries navigation, penalty fields
-- [ ] Verify in sandbox: sample batch posts, Reconcile agrees, one penalty of 1,350 (5% × 27,000)
+- [x] Verify in sandbox: sample batch posts, Reconcile agrees, one penalty of 1,350 (5% × 27,000)
 
 **Step 5 – Member statement (Part 5)**
 - [x] Date Filter on Member, report dataset
 - [x] RDLC layout (`app/src/Statement/PENMemberStatement.rdlc`, next to `PENMemberStatement.Report.al`)
 - [x] Actions on Member Card and Member List
-- [ ] Verify: opening + contributions = closing; member with no entries still prints
+- [x] Verify: opening + contributions = closing; member with no entries still prints
 
 **Role center (added)**
 - [x] Profile `PEN PENSION ADMINISTRATOR` + role center page with Activities cues (queue status, open batches, batches with errors, active employers / members), navigation, New Employer / Member, Member Statement
@@ -71,7 +71,7 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [x] Repository split into `app/` (extension) and `test/` (test app) + `Pension Contribution.code-workspace`
 - [x] Test data generator (1 scheme, 50 employers, 2,000 members, ~2.5% bad lines, every 10th batch late) + "Generate Test Data" action on Pension Setup
 - [x] Test app: all 4 brief scenarios + late penalty; own data per test; processes only its own batch
-- [ ] Verify in sandbox: run generator + Process Now; publish test app and run tests
+- [x] Verify in sandbox: generator + Process Now (2,020 lines in ~10 s), all 5 tests pass in AL Test Tool
 
 **Step 7 – Stretch goals (optional)**
 - [ ] Queue monitor page
@@ -403,5 +403,6 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 | Late Penalty % default | 5% on install (brief gives no value; needed for the sample's late batch to post a penalty) |
 | Posting date | last day of the contribution period |
 | Tests | separate test app in `test/`, IDs 50140–50149 (the AL compiler includes every .al file under a project folder, so the test app cannot sit inside the main app's folder). No dependency on Microsoft test libraries: the test library has its own small asserts |
+| asserterror in tests | `asserterror` rolls back the whole open transaction, so the duplicate-message test commits the first batch before it; the test runner's isolation still rolls everything back at the end of the test |
 | Test isolation | each test creates its own scheme, G/L accounts, employer and members with random unique keys, and processes only its own batch (`PEN Queue Processor.SetBatchFilter`), so tests ignore other data in the company |
 | Generator data | master data is found again by KRA PIN (`P000000001G`…) and National ID (`GEN0000100001`…), so re-running for another period reuses employers and members and only adds batches; batches use message ID `GEN-<employer>-<period>`, so re-running the same period skips them. Bad lines rotate per employer: over the cap (employer 10% vs 7.5% cap), inactive (exited) member, member of another employer. Generated G/L accounts: `PEN-RECV`, `PEN-LIAB`, `PEN-PENALTY`; scheme `GEN` |
