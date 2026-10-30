@@ -1,0 +1,12 @@
+{
+  "messageId": "EMP0001-202610-001",
+  "employerNo": "EMP0001",
+  "period": "2026-10",
+  "receivedDate": "2026-11-12",
+  "controlTotal": 27000.00,
+  "lines": [
+    { "memberNo": "MEM00001", "employeeAmount": 6000.00, "employerAmount": 6000.00 },
+    { "memberNo": "MEM00002", "employeeAmount": 4500.00, "employerAmount": 4500.00 },
+    { "memberNo": "MEM00003", "employeeAmount": 3000.00, "employerAmount": 3000.00 }
+  ]
+}

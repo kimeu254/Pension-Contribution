@@ -32,12 +32,13 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [ ] Verify acceptance criteria 1–3 in sandbox
 
 **Step 2 – Intake (Part 2)**
-- [ ] Enums: Queue Line Status, Batch Status, Intake Source
-- [ ] Tables: Contribution Batch, Contribution Queue
-- [ ] Intake codeunit (single entry point, structural checks, duplicate message ID, control total)
-- [ ] JSON reader
-- [ ] CSV reader (extra credit)
-- [ ] Pages: Contribution Batches, Batch card, Queue Lines; Import File action
+- [x] Enums: Queue Line Status, Batch Status, Intake Source
+- [x] Tables: Contribution Batch, Contribution Queue
+- [x] Intake codeunit (single entry point, structural checks, duplicate message ID, control total)
+- [x] JSON reader
+- [x] CSV reader (extra credit)
+- [x] Pages: Contribution Batches (with Import File action and line-count drill-downs), Contribution Queue
+- [x] Sample files in `samples/` (JSON, CSV, bad control total)
 - [ ] Verify: sample loads, reload rejected, wrong control total rejected
 
 **Step 3 – Background processing (Part 3)**
@@ -131,8 +132,8 @@ tests use 50140–50149 to avoid collisions.
 | Page | 50104 | PEN Member List | |
 | Page | 50105 | PEN Member Card | |
 | Page | 50106 | PEN Contribution Batches (list) | |
-| Page | 50107 | PEN Contribution Batch (document card) | |
-| Page | 50108 | PEN Contribution Queue Lines (list + subpage use, Reprocess action) | |
+| Page | 50107 | (free – no batch card; the brief only requires cards for Employer and Member) | |
+| Page | 50108 | PEN Contribution Queue (list, Reprocess action in Step 3) | |
 | Page | 50109 | PEN Member Ledger Entries | |
 | Page | 50110 | PEN Queue Monitor (stretch) | |
 | Page | 50111 | PEN Contribution API (stretch) | |
@@ -191,14 +192,15 @@ duplicate National ID, age 17 → all rejected.
 
 ### Step 2 – Intake (Part 2)
 
-**PEN Contribution Batch** (header): `No.` (series), `Message ID` (unique key), `Employer No.`,
-`Period` Code[7], `Received Date`, `Control Total`, `Line Count`, `Total Amount`, `Source`,
-`Status`, `Penalty Posted` (bool), `Penalty Amount`, `Created At/By`, FlowFields: counts by line status.
+**PEN Contribution Batch** (header): `No.` (series), `Message ID` Code[50] (unique key), `Employer No.`,
+`Period` Code[7], `Received Date`, `Control Total`, `Status`, `Source`, `File Name`, `Created By/At`;
+FlowFields: `No. of Lines`, employee / employer totals, line counts by status.
+(`Penalty Posted`, `Penalty Amount` added in Step 4.)
 
 **PEN Contribution Queue** (line): `Entry No.` (AutoIncrement PK), `Batch No.`, `Line No.`,
-`Message ID`, `Employer No.`, `Member No.`, `Period`, `Employee Amount`, `Employer Amount`,
-`Status`, `Retry Count`, `Last Error` Text[2048], `Last Attempt At`, `Claimed By Session`,
-`Claimed At`, `Posted Document No.`.
+`Employer No.`, `Member No.`, `Period`, `Employee Amount`, `Employer Amount`,
+`Status`, `Retry Count`, `Last Error` Text[2048], `Last Attempt At`.
+(`Claimed By Session`, `Claimed At` added in Step 3; `Posted Document No.` in Step 4.)
 Keys: `(Status, Batch No.)` for the processor, `(Member No., Period, Status)` for the duplicate check,
 `(Batch No., Line No.)` for the page.
 
@@ -319,6 +321,12 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 |---|---|
 | Control total | equals Σ(employee + employer) over all lines |
 | Intake failure | all-or-nothing; no partial batch is created |
+| Intake structural checks | message ID, employer no., period (`YYYY-MM`), received date present; values fit their field lengths; amounts are numbers and not negative; control total > 0; at least one line; CSV batch columns identical on every row. Member / employer existence is **not** checked at intake (business validation, Step 3) |
+| Message ID uniqueness | explicit check with a clear message, backed by a `Unique` key so two simultaneous uploads cannot both succeed |
+| Amount formats | parsed culture-independently (decimal point, `YYYY-MM-DD` dates) so a file reads the same whatever the user's language |
+| CSV columns | found by heading name (case-insensitive), so column order does not matter; blank rows are skipped |
+| Deleting a batch | allowed only while none of its lines are Processing or Posted; deletes its lines too |
+| Batch page | no batch card; the Contribution Batches list drills down to its lines via the Lines action and the line-count fields |
 | Penalty base | control total of the batch (what the employer declared) |
 | Penalty timing | posted with the first processed chunk of the batch, flag prevents repeats |
 | GL summary granularity | one pair per scheme per processed chunk of a batch; with batch size 500 and ~40 lines per employer that is one pair per batch |
