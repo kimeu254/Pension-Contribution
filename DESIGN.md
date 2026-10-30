@@ -60,13 +60,15 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 
 **Step 5 – Member statement (Part 5)**
 - [x] Date Filter on Member, report dataset
-- [x] RDLC layout (`src/Reports/Rep50100.PENMemberStatement.rdlc`, next to the report object)
+- [x] RDLC layout (`app/src/Statement/PENMemberStatement.rdlc`, next to `PENMemberStatement.Report.al`)
 - [x] Actions on Member Card and Member List
 - [ ] Verify: opening + contributions = closing; member with no entries still prints
 
 **Step 6 – Generator, tests (Part 6)**
-- [ ] Test data generator (1 scheme, 50 employers, 2,000 members, ~3% bad lines) + page action
-- [ ] Test app with 3–4 test scenarios
+- [x] Repository split into `app/` (extension) and `test/` (test app) + `Pension Contribution.code-workspace`
+- [x] Test data generator (1 scheme, 50 employers, 2,000 members, ~2.5% bad lines, every 10th batch late) + "Generate Test Data" action on Pension Setup
+- [x] Test app: all 4 brief scenarios + late penalty; own data per test; processes only its own batch
+- [ ] Verify in sandbox: run generator + Process Now; publish test app and run tests
 
 **Step 7 – Stretch goals (optional)**
 - [ ] Queue monitor page
@@ -106,6 +108,30 @@ so pages, API and tests all exercise the same code.
 
 ---
 
+## 1a. Repository layout
+
+```
+Pension Contribution/
+├─ app/                      the extension (submitted .app)
+│  └─ src/
+│     ├─ Setup/              Pension Setup table + page, Install codeunit, permission set
+│     ├─ MasterData/         Scheme, Employer, Member tables, pages and status enums
+│     ├─ Intake/             Contribution Batch + Queue, intake codeunit, JSON/CSV readers, pages
+│     ├─ Processing/         Queue Processor (Job Queue), Line Validation
+│     ├─ Posting/            Contribution Posting, Member Ledger Entry table/page/enum
+│     ├─ Statement/          Member Statement report + its .rdlc layout
+│     └─ TestData/           test data generator + its dialog page
+├─ test/                     test app (depends on app; IDs 50140-50149)
+│  └─ src/                   PEN Contribution Tests, PEN Test Library
+├─ samples/                  sample JSON / CSV files for manual testing
+├─ DESIGN.md, README.md
+└─ Pension Contribution.code-workspace
+```
+
+Source is grouped by feature (one folder per part of the brief) rather than by object type, so each part can be
+read and explained in one place. Files follow Microsoft's naming convention `<ObjectName>.<ObjectType>.al`
+(e.g. `PENScheme.Table.al`), so CodeCop's file-name rule (AA0215) passes.
+
 ## 2. Object ID plan (50100–50149, prefix PEN)
 
 Enums/tables/pages/codeunits have separate ID spaces, but the test app shares the tenant, so
@@ -135,7 +161,7 @@ tests use 50140–50149 to avoid collisions.
 | Page | 50104 | PEN Member List | |
 | Page | 50105 | PEN Member Card | |
 | Page | 50106 | PEN Contribution Batches (list) | |
-| Page | 50107 | (free – no batch card; the brief only requires cards for Employer and Member) | |
+| Page | 50107 | PEN Generate Test Data (dialog for the generator; no batch card is needed) | |
 | Page | 50108 | PEN Contribution Queue (list, Reprocess action in Step 3) | |
 | Page | 50109 | PEN Member Ledger Entries | |
 | Page | 50110 | PEN Queue Monitor (stretch) | |
@@ -149,7 +175,8 @@ tests use 50140–50149 to avoid collisions.
 | Codeunit | 50106 | PEN Test Data Generator | |
 | Codeunit | 50107 | PEN Install (setup defaults, no. series) | |
 | Report | 50100 | PEN Member Statement (RDLC or Word) | |
-| Codeunit | 50140–50149 | Test codeunit(s) – separate test app | |
+| Codeunit | 50140 | PEN Contribution Tests (test app) | |
+| Codeunit | 50141 | PEN Test Library (test app: data setup + asserts) | |
 
 ---
 
@@ -368,4 +395,6 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 | Number series | created on install: `PEN-MEM` (MEM00001), `PEN-EMP` (EMP0001), `PEN-BATCH` (PCB000001); manual numbers allowed |
 | Late Penalty % default | 5% on install (brief gives no value; needed for the sample's late batch to post a penalty) |
 | Posting date | last day of the contribution period |
-| Tests | separate test app, IDs 50140–50149 |
+| Tests | separate test app in `test/`, IDs 50140–50149 (the AL compiler includes every .al file under a project folder, so the test app cannot sit inside the main app's folder). No dependency on Microsoft test libraries: the test library has its own small asserts |
+| Test isolation | each test creates its own scheme, G/L accounts, employer and members with random unique keys, and processes only its own batch (`PEN Queue Processor.SetBatchFilter`), so tests ignore other data in the company |
+| Generator data | master data is found again by KRA PIN (`P000000001G`…) and National ID (`GEN0000100001`…), so re-running for another period reuses employers and members and only adds batches; batches use message ID `GEN-<employer>-<period>`, so re-running the same period skips them. Bad lines rotate per employer: over the cap (employer 10% vs 7.5% cap), inactive (exited) member, member of another employer. Generated G/L accounts: `PEN-RECV`, `PEN-LIAB`, `PEN-PENALTY`; scheme `GEN` |

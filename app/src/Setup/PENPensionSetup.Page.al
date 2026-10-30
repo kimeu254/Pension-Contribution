@@ -89,6 +89,27 @@ page 50100 "PEN Pension Setup"
                     QueueProcessor.ScheduleRecurringJob();
                 end;
             }
+            action(GenerateTestData)
+            {
+                ApplicationArea = All;
+                Caption = 'Generate Test Data';
+                Image = CreateDocuments;
+                ToolTip = 'Create a test scheme, employers, members and one contribution batch per employer for a period, including a few deliberately bad lines.';
+
+                trigger OnAction()
+                var
+                    TestDataGenerator: Codeunit "PEN Test Data Generator";
+                    GenerateTestDataPage: Page "PEN Generate Test Data";
+                    Period: Code[7];
+                    NoOfEmployers: Integer;
+                    MembersPerEmployer: Integer;
+                begin
+                    if GenerateTestDataPage.RunModal() <> Action::OK then
+                        exit;
+                    GenerateTestDataPage.GetOptions(Period, NoOfEmployers, MembersPerEmployer);
+                    TestDataGenerator.Generate(Period, NoOfEmployers, MembersPerEmployer);
+                end;
+            }
         }
         area(Navigation)
         {
@@ -105,6 +126,9 @@ page 50100 "PEN Pension Setup"
         area(Promoted)
         {
             actionref(ScheduleProcessing_Promoted; ScheduleProcessing)
+            {
+            }
+            actionref(GenerateTestData_Promoted; GenerateTestData)
             {
             }
             actionref(JobQueueEntries_Promoted; JobQueueEntries)

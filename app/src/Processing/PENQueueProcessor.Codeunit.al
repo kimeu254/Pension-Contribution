@@ -9,6 +9,7 @@ codeunit 50103 "PEN Queue Processor"
 
     var
         PensionSetup: Record "PEN Pension Setup";
+        BatchNoFilter: Code[20];
         DuplicateInChunkErr: Label 'Member %1 appears more than once for period %2 in this batch.', Comment = '%1 = Member No., %2 = period';
         JobDescriptionTxt: Label 'Process pension contribution queue';
         JobScheduledMsg: Label 'Background processing is scheduled to run every %1 minute(s).', Comment = '%1 = minutes';
@@ -35,6 +36,14 @@ codeunit 50103 "PEN Queue Processor"
             UpdateBatchStatus(BatchNo);
             Commit();
         end;
+    end;
+
+    /// <summary>
+    /// Limits the next ProcessQueue call to the lines of one batch. Blank processes every batch (the Job Queue default).
+    /// </summary>
+    procedure SetBatchFilter(BatchNo: Code[20])
+    begin
+        BatchNoFilter := BatchNo;
     end;
 
     /// <summary>
@@ -132,6 +141,8 @@ codeunit 50103 "PEN Queue Processor"
     begin
         QueueLine.SetCurrentKey(Status, "Batch No.");
         QueueLine.SetRange(Status, QueueLine.Status::Processing);
+        if BatchNoFilter <> '' then
+            QueueLine.SetRange("Batch No.", BatchNoFilter);
         QueueLine.SetLoadFields("Claimed By Session", "Claimed At");
         if QueueLine.FindSet() then
             repeat
@@ -169,6 +180,8 @@ codeunit 50103 "PEN Queue Processor"
     begin
         QueueLine.SetCurrentKey(Status, "Batch No.");
         QueueLine.SetRange(Status, QueueLine.Status::Failed);
+        if BatchNoFilter <> '' then
+            QueueLine.SetRange("Batch No.", BatchNoFilter);
         if not QueueLine.IsEmpty() then
             QueueLine.ModifyAll(Status, QueueLine.Status::Pending);
     end;
@@ -187,6 +200,8 @@ codeunit 50103 "PEN Queue Processor"
         QueueLine.ReadIsolation := IsolationLevel::UpdLock;
         QueueLine.SetCurrentKey(Status, "Batch No.");
         QueueLine.SetRange(Status, QueueLine.Status::Pending);
+        if BatchNoFilter <> '' then
+            QueueLine.SetRange("Batch No.", BatchNoFilter);
         QueueLine.SetLoadFields("Batch No.");
         if not QueueLine.FindFirst() then
             exit(false);

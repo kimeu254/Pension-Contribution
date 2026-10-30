@@ -6,7 +6,7 @@ rad.json
 *.g.xlf
 
 # Local environment / credentials
-.vscode/launch.json
+**/.vscode/launch.json
 .altestrunner/
 *.flf
 *.bclicense

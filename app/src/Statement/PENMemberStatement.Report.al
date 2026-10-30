@@ -144,7 +144,7 @@ report 50100 "PEN Member Statement"
         layout(RDLCLayout)
         {
             Type = RDLC;
-            LayoutFile = './src/Reports/Rep50100.PENMemberStatement.rdlc';
+            LayoutFile = './src/Statement/PENMemberStatement.rdlc';
             Caption = 'Member Statement (RDLC)';
         }
     }

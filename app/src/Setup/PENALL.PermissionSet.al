@@ -27,6 +27,7 @@ permissionset 50100 "PEN ALL"
         page "PEN Member Ledger Entries" = X,
         page "PEN Contribution Batches" = X,
         page "PEN Contribution Queue" = X,
+        page "PEN Generate Test Data" = X,
         codeunit "PEN Install" = X,
         codeunit "PEN Contribution Intake" = X,
         codeunit "PEN JSON Batch Reader" = X,
@@ -34,5 +35,6 @@ permissionset 50100 "PEN ALL"
         codeunit "PEN Queue Processor" = X,
         codeunit "PEN Line Validation" = X,
         codeunit "PEN Contribution Posting" = X,
+        codeunit "PEN Test Data Generator" = X,
         report "PEN Member Statement" = X;
 }

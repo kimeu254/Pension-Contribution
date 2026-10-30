@@ -1,0 +1,39 @@
+{
+  "id": "5b0c2a9e-3f41-4d7e-9b8a-6c2e1f0d4a37",
+  "name": "Pension Contribution Tests",
+  "publisher": "JIMMY MUTISO",
+  "version": "1.0.0.0",
+  "brief": "Automated tests for the Pension Contribution extension.",
+  "description": "",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [
+    {
+      "id": "7dc8d73e-7c56-4b98-94d1-dc3f16e0b778",
+      "name": "Pension Contribution",
+      "publisher": "JIMMY MUTISO",
+      "version": "1.0.0.0"
+    }
+  ],
+  "screenshots": [],
+  "platform": "1.0.0.0",
+  "application": "29.0.0.0",
+  "idRanges": [
+    {
+      "from": 50140,
+      "to": 50149
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "runtime": "18.0",
+  "features": [
+    "NoImplicitWith"
+  ]
+}

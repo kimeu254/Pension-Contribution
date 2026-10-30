@@ -48,6 +48,15 @@ codeunit 50107 "PEN Install"
             PensionSetup."Contribution Batch Nos." := CreateNoSeries(BatchNosTok, BatchNosDescTxt, 'PCB000001');
             Changed := true;
         end;
+        // Setup records created before the joining age fields existed have 0 in them.
+        if PensionSetup."Min. Joining Age" = 0 then begin
+            PensionSetup."Min. Joining Age" := 18;
+            Changed := true;
+        end;
+        if PensionSetup."Max. Joining Age" = 0 then begin
+            PensionSetup."Max. Joining Age" := 65;
+            Changed := true;
+        end;
         if Changed then
             PensionSetup.Modify(true);
     end;

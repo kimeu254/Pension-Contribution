@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "name": "Pension Contribution (app)",
+      "path": "app"
+    },
+    {
+      "name": "Pension Contribution Tests",
+      "path": "test"
+    },
+    {
+      "name": "Repository root",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "al.enableCodeAnalysis": true,
+    "al.codeAnalyzers": [
+      "${CodeCop}",
+      "${UICop}",
+      "${PerTenantExtensionCop}"
+    ]
+  }
+}
