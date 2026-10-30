@@ -88,6 +88,9 @@ codeunit 50140 "PEN Contribution Tests"
         MessageId := Lib.GetUniqueMessageId();
         Lib.AddLine(TempLine, MemberNo, 1000, 1000);
         Lib.CreateBatch(EmployerNo, PeriodTok, 20261109D, MessageId, TempLine);
+        // asserterror rolls back the open transaction; commit so the first batch survives it.
+        // The test runner's isolation still rolls everything back when the test ends.
+        Commit();
 
         // [WHEN] The same message ID is received again
         asserterror Lib.CreateBatch(EmployerNo, PeriodTok, 20261109D, MessageId, TempLine);
