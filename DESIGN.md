@@ -64,6 +64,9 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [x] Actions on Member Card and Member List
 - [ ] Verify: opening + contributions = closing; member with no entries still prints
 
+**Role center (added)**
+- [x] Profile `PEN PENSION ADMINISTRATOR` + role center page with Activities cues (queue status, open batches, batches with errors, active employers / members), navigation, New Employer / Member, Member Statement
+
 **Step 6 – Generator, tests (Part 6)**
 - [x] Repository split into `app/` (extension) and `test/` (test app) + `Pension Contribution.code-workspace`
 - [x] Test data generator (1 scheme, 50 employers, 2,000 members, ~2.5% bad lines, every 10th batch late) + "Generate Test Data" action on Pension Setup
@@ -120,7 +123,8 @@ Pension Contribution/
 │     ├─ Processing/         Queue Processor (Job Queue), Line Validation
 │     ├─ Posting/            Contribution Posting, Member Ledger Entry table/page/enum
 │     ├─ Statement/          Member Statement report + its .rdlc layout
-│     └─ TestData/           test data generator + its dialog page
+│     ├─ TestData/           test data generator + its dialog page
+│     └─ RoleCenter/         Pension Administrator profile, role center, Activities cues + cue table
 ├─ test/                     test app (depends on app; IDs 50140-50149)
 │  └─ src/                   PEN Contribution Tests, PEN Test Library
 ├─ samples/                  sample JSON / CSV files for manual testing
@@ -154,6 +158,7 @@ tests use 50140–50149 to avoid collisions.
 | Table | 50105 | PEN Contribution Queue | |
 | Table | 50106 | PEN Member Ledger Entry | |
 | Table | 50107 | PEN API Intake Buffer (stretch) | |
+| Table | 50108 | PEN Pension Cue (role center cues) | |
 | Page | 50100 | PEN Pension Setup (card) | |
 | Page | 50101 | PEN Schemes (list) | |
 | Page | 50102 | PEN Employer List | |
@@ -166,6 +171,8 @@ tests use 50140–50149 to avoid collisions.
 | Page | 50109 | PEN Member Ledger Entries | |
 | Page | 50110 | PEN Queue Monitor (stretch) | |
 | Page | 50111 | PEN Contribution API (stretch) | |
+| Page | 50112 | PEN Pension Role Center | |
+| Page | 50113 | PEN Pension Activities (cues) | |
 | Codeunit | 50100 | PEN Contribution Intake | |
 | Codeunit | 50101 | PEN JSON Batch Reader | |
 | Codeunit | 50102 | PEN CSV Batch Reader | |
