@@ -106,9 +106,30 @@ page 50105 "PEN Member Card"
                 ToolTip = 'View the member''s contribution ledger entries.';
             }
         }
+        area(Reporting)
+        {
+            action(Statement)
+            {
+                ApplicationArea = All;
+                Caption = 'Member Statement';
+                Image = Report;
+                ToolTip = 'Print the member''s statement of contributions and balance for a date range.';
+
+                trigger OnAction()
+                var
+                    Member: Record "PEN Member";
+                begin
+                    Member.SetRange("No.", Rec."No.");
+                    Report.Run(Report::"PEN Member Statement", true, false, Member);
+                end;
+            }
+        }
         area(Promoted)
         {
             actionref(LedgerEntries_Promoted; LedgerEntries)
+            {
+            }
+            actionref(Statement_Promoted; Statement)
             {
             }
         }

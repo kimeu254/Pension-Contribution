@@ -73,9 +73,29 @@ page 50104 "PEN Member List"
                 ToolTip = 'View the member''s contribution ledger entries.';
             }
         }
+        area(Reporting)
+        {
+            action(Statement)
+            {
+                Caption = 'Member Statement';
+                Image = Report;
+                ToolTip = 'Print statements for the selected members for a date range. Each member starts on a new page.';
+
+                trigger OnAction()
+                var
+                    Member: Record "PEN Member";
+                begin
+                    CurrPage.SetSelectionFilter(Member);
+                    Report.Run(Report::"PEN Member Statement", true, false, Member);
+                end;
+            }
+        }
         area(Promoted)
         {
             actionref(LedgerEntries_Promoted; LedgerEntries)
+            {
+            }
+            actionref(Statement_Promoted; Statement)
             {
             }
         }

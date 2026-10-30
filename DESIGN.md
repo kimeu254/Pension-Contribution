@@ -59,9 +59,9 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [ ] Verify in sandbox: sample batch posts, Reconcile agrees, one penalty of 1,350 (5% × 27,000)
 
 **Step 5 – Member statement (Part 5)**
-- [ ] Date Filter on Member, report dataset
-- [ ] RDLC layout
-- [ ] Actions on Member Card and Member List
+- [x] Date Filter on Member, report dataset
+- [x] RDLC layout (`src/Reports/Rep50100.PENMemberStatement.rdlc`, next to the report object)
+- [x] Actions on Member Card and Member List
 - [ ] Verify: opening + contributions = closing; member with no entries still prints
 
 **Step 6 – Generator, tests (Part 6)**
@@ -340,6 +340,9 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 | G/L journal lines | accounts are assigned, not validated, so no VAT / posting groups are pulled from the accounts; `System-Created Entry`, External Document No. = Message ID |
 | Concurrency in posting | batch row locked (doc number + penalty flag), each line re-read under lock and must still carry this run's Claim ID, member row locked and the already-posted check repeated, so the same member/period cannot be posted by two runs |
 | Zero amounts | each line always creates both member ledger entries (as specified), even when one amount is 0; a scheme total of 0 posts no G/L entry |
+| Statement balances | opening (before start date) and closing (at end date) come from the Balance FlowField, independently of the period rows, so "opening + contributions = closing" is a genuine cross-check |
+| Statement rows | one row per contribution period (employee and employer side by side) rather than one row per ledger entry; a member with no entries in the range prints the header, "No contributions in this period", and opening = closing |
+| Statement defaults | start = first day of the work date's year, end = work date; one page per member |
 | Reconciliation | Reconcile action on the batch compares Σ member ledger `Amount` for the batch with the credit to the scheme's Member Liability account over all of the batch's document numbers |
 | GL summary granularity | one pair per scheme per processed chunk of a batch; with batch size 500 and ~40 lines per employer that is one pair per batch |
 | Retry semantics | "Failed more than Max Retry Attempts": Retry Count > Max → Dead Letter. With Max = 3 a line is attempted 4 times (first try + 3 retries). The line goes straight to Dead Letter on the failure that exceeds the limit |
