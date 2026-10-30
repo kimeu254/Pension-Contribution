@@ -77,6 +77,10 @@ table 50105 "PEN Contribution Queue"
         {
             Caption = 'Claimed At';
         }
+        field(16; "Posted Document No."; Code[20])
+        {
+            Caption = 'Posted Document No.';
+        }
     }
     keys
     {

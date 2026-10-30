@@ -61,6 +61,10 @@ page 50108 "PEN Contribution Queue"
                 {
                     ToolTip = 'Specifies when the line was last processed.';
                 }
+                field("Posted Document No."; Rec."Posted Document No.")
+                {
+                    ToolTip = 'Specifies the document number of the member ledger and G/L entries posted for the line.';
+                }
                 field("Entry No."; Rec."Entry No.")
                 {
                     ToolTip = 'Specifies the unique number of the queue line.';

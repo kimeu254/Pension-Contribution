@@ -74,6 +74,23 @@ page 50106 "PEN Contribution Batches"
                     ToolTip = 'Specifies the total employer contributions in the batch.';
                     Visible = false;
                 }
+                field("Member Ledger Amount"; Rec."Member Ledger Amount")
+                {
+                    ToolTip = 'Specifies the total posted to the member ledger from this batch. Choose the value to see the entries.';
+                }
+                field("Penalty Posted"; Rec."Penalty Posted")
+                {
+                    ToolTip = 'Specifies whether a late remittance penalty has been posted for the batch.';
+                }
+                field("Penalty Amount"; Rec."Penalty Amount")
+                {
+                    ToolTip = 'Specifies the late remittance penalty charged to the employer.';
+                }
+                field("Penalty Document No."; Rec."Penalty Document No.")
+                {
+                    ToolTip = 'Specifies the G/L document number of the penalty posting.';
+                    Visible = false;
+                }
                 field(Source; Rec.Source)
                 {
                     ToolTip = 'Specifies how the batch was received.';
@@ -135,6 +152,25 @@ page 50106 "PEN Contribution Batches"
                     QueueProcessor.RunOnceInBackground();
                 end;
             }
+            action(Reconcile)
+            {
+                Caption = 'Reconcile';
+                Image = Reconcile;
+                ToolTip = 'Compare the member ledger total of the batch with the credit to the Member Liability account in the general ledger.';
+
+                trigger OnAction()
+                var
+                    ContributionPosting: Codeunit "PEN Contribution Posting";
+                    MemberLedgerTotal: Decimal;
+                    GLMemberLiabilityCredit: Decimal;
+                begin
+                    ContributionPosting.GetReconciliation(Rec, MemberLedgerTotal, GLMemberLiabilityCredit);
+                    if MemberLedgerTotal = GLMemberLiabilityCredit then
+                        Message(ReconciledMsg, Rec."No.", MemberLedgerTotal, GLMemberLiabilityCredit)
+                    else
+                        Message(NotReconciledMsg, Rec."No.", MemberLedgerTotal, GLMemberLiabilityCredit, MemberLedgerTotal - GLMemberLiabilityCredit);
+                end;
+            }
         }
         area(Navigation)
         {
@@ -147,6 +183,28 @@ page 50106 "PEN Contribution Batches"
                 RunPageView = sorting("Batch No.", "Line No.");
                 ToolTip = 'View the member lines of the batch.';
             }
+            action(MemberLedgerEntries)
+            {
+                Caption = 'Member Ledger Entries';
+                Image = LedgerEntries;
+                RunObject = page "PEN Member Ledger Entries";
+                RunPageLink = "Batch No." = field("No.");
+                ToolTip = 'View the member ledger entries posted from the batch.';
+            }
+            action(GLEntries)
+            {
+                Caption = 'G/L Entries';
+                Image = GLRegisters;
+                ToolTip = 'View the general ledger entries posted from the batch, including the late penalty.';
+
+                trigger OnAction()
+                var
+                    GLEntry: Record "G/L Entry";
+                begin
+                    GLEntry.SetFilter("Document No.", Rec.GetDocumentNoFilter());
+                    Page.Run(Page::"General Ledger Entries", GLEntry);
+                end;
+            }
         }
         area(Promoted)
         {
@@ -156,12 +214,23 @@ page 50106 "PEN Contribution Batches"
             actionref(ProcessNow_Promoted; ProcessNow)
             {
             }
+            actionref(Reconcile_Promoted; Reconcile)
+            {
+            }
             actionref(Lines_Promoted; Lines)
+            {
+            }
+            actionref(MemberLedgerEntries_Promoted; MemberLedgerEntries)
+            {
+            }
+            actionref(GLEntries_Promoted; GLEntries)
             {
             }
         }
     }
 
     var
+        ReconciledMsg: Label 'Batch %1 reconciles.\Member ledger total: %2\G/L credit to Member Liability: %3', Comment = '%1 = Batch No., %2 = member ledger total, %3 = G/L credit';
+        NotReconciledMsg: Label 'Batch %1 does NOT reconcile.\Member ledger total: %2\G/L credit to Member Liability: %3\Difference: %4', Comment = '%1 = Batch No., %2 = member ledger total, %3 = G/L credit, %4 = difference';
         BatchCreatedMsg: Label 'Batch %1 (message ID %2) was received with %3 lines. The lines are Pending and will be processed in the background.', Comment = '%1 = Batch No., %2 = Message ID, %3 = number of lines';
 }

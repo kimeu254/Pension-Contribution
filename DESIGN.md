@@ -51,11 +51,12 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [ ] Verify in sandbox: bad lines fail with their own error, retries → Dead Letter, Reprocess, users can keep working
 
 **Step 4 – Posting (Part 4)**
-- [ ] Member ledger entries (2 per line, AutoIncrement Entry No.)
-- [ ] Summarised GL pair per scheme via Gen. Jnl.-Post Line
-- [ ] Late penalty once per batch
-- [ ] `OnAfterQueueLinePosted` event
-- [ ] Verify reconciliation: member ledger total = GL Member Liability credit
+- [x] Member ledger entries (2 per line, AutoIncrement Entry No.)
+- [x] Summarised GL pair per scheme via Gen. Jnl.-Post Line
+- [x] Late penalty once per batch
+- [x] `OnAfterQueueLinePosted` and `OnBeforePostGenJournalLine` events
+- [x] Batch page: Reconcile action, Member Ledger Entries / G/L Entries navigation, penalty fields
+- [ ] Verify in sandbox: sample batch posts, Reconcile agrees, one penalty of 1,350 (5% × 27,000)
 
 **Step 5 – Member statement (Part 5)**
 - [ ] Date Filter on Member, report dataset
@@ -334,6 +335,12 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 | Batch page | no batch card; the Contribution Batches list drills down to its lines via the Lines action and the line-count fields |
 | Penalty base | control total of the batch (what the employer declared) |
 | Penalty timing | posted with the first processed chunk of the batch, flag prevents repeats |
+| Penalty posting date | the batch's Received Date (when the lateness happened); contributions post on the last day of the period |
+| G/L document numbers | first posting of a batch uses the batch number (e.g. PCB000001); later postings of retried lines use PCB000001-2, -3…; member ledger entries carry the same number. Filter `PCB000001|PCB000001-*` finds every posting of a batch |
+| G/L journal lines | accounts are assigned, not validated, so no VAT / posting groups are pulled from the accounts; `System-Created Entry`, External Document No. = Message ID |
+| Concurrency in posting | batch row locked (doc number + penalty flag), each line re-read under lock and must still carry this run's Claim ID, member row locked and the already-posted check repeated, so the same member/period cannot be posted by two runs |
+| Zero amounts | each line always creates both member ledger entries (as specified), even when one amount is 0; a scheme total of 0 posts no G/L entry |
+| Reconciliation | Reconcile action on the batch compares Σ member ledger `Amount` for the batch with the credit to the scheme's Member Liability account over all of the batch's document numbers |
 | GL summary granularity | one pair per scheme per processed chunk of a batch; with batch size 500 and ~40 lines per employer that is one pair per batch |
 | Retry semantics | "Failed more than Max Retry Attempts": Retry Count > Max → Dead Letter. With Max = 3 a line is attempted 4 times (first try + 3 retries). The line goes straight to Dead Letter on the failure that exceeds the limit |
 | Retry timing | Failed lines are requeued at the start of the **next** run, not immediately, so the job queue interval acts as the retry delay |
