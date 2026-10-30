@@ -23,19 +23,12 @@ page 50112 "PEN Pension Role Center"
     {
         area(Embedding)
         {
-            action(Batches)
+            action(Schemes)
             {
                 ApplicationArea = All;
-                Caption = 'Contribution Batches';
-                RunObject = page "PEN Contribution Batches";
-                ToolTip = 'Import contribution files and follow their processing.';
-            }
-            action(Queue)
-            {
-                ApplicationArea = All;
-                Caption = 'Contribution Queue';
-                RunObject = page "PEN Contribution Queue";
-                ToolTip = 'View the member lines of all batches, their status and errors, and reprocess failed lines.';
+                Caption = 'Schemes';
+                RunObject = page "PEN Schemes";
+                ToolTip = 'View and manage pension schemes and their G/L accounts.';
             }
             action(Employers)
             {
@@ -51,12 +44,19 @@ page 50112 "PEN Pension Role Center"
                 RunObject = page "PEN Member List";
                 ToolTip = 'View and manage scheme members.';
             }
-            action(Schemes)
+            action(Batches)
             {
                 ApplicationArea = All;
-                Caption = 'Schemes';
-                RunObject = page "PEN Schemes";
-                ToolTip = 'View and manage pension schemes and their G/L accounts.';
+                Caption = 'Contribution Batches';
+                RunObject = page "PEN Contribution Batches";
+                ToolTip = 'Import contribution files and follow their processing.';
+            }
+            action(Queue)
+            {
+                ApplicationArea = All;
+                Caption = 'Contribution Queue';
+                RunObject = page "PEN Contribution Queue";
+                ToolTip = 'View the member lines of all batches, their status and errors, and reprocess failed lines.';
             }
         }
         area(Sections)
