@@ -42,11 +42,13 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [ ] Verify: sample loads, reload rejected, wrong control total rejected
 
 **Step 3 – Background processing (Part 3)**
-- [ ] Line validation codeunit (TryFunction) + `OnBeforeValidateQueueLine` event
-- [ ] Queue Processor: stale-claim recovery, retry sweep, claim/commit, per-line processing
-- [ ] Dead Letter after Max Retry Attempts
-- [ ] Reprocess action
-- [ ] Job Queue Entry setup + verify users can keep working
+- [x] Line validation codeunit (TryFunction) + `OnBeforeValidateQueueLine` / `OnAfterValidateQueueLine` events
+- [x] Queue Processor: stale-claim recovery, retry sweep, claim/commit, per-line processing
+- [x] Dead Letter after Max Retry Attempts
+- [x] Reprocess action
+- [x] Job Queue: "Schedule Background Processing" (setup page) and "Process Now" (batches / queue pages)
+- [x] Posting stub (`PEN Contribution Posting`) that fails on purpose until Step 4
+- [ ] Verify in sandbox: bad lines fail with their own error, retries → Dead Letter, Reprocess, users can keep working
 
 **Step 4 – Posting (Part 4)**
 - [ ] Member ledger entries (2 per line, AutoIncrement Entry No.)
@@ -245,11 +247,14 @@ Reprocess action on the queue lines page: selected `Failed` / `Dead Letter` line
 
 **Preventing two Job Queue entries processing the same line (README answer):**
 claiming is a separate, committed transaction that changes the status from `Pending` to
-`Processing` under a lock and stamps the session ID. A second job either waits on the lock and then
-no longer sees those lines as `Pending`, or claims a different set. Processing only touches lines
-stamped with its own session. As a last line of defence, posting re-reads the line with
-`UpdLock` and refuses unless it is still `Processing` by this session, and the
-"no Posted line for member + period" rule stops a double post even if the status logic were bypassed.
+`Processing` with an update lock (`ReadIsolation := UpdLock`) and stamps the line with a new
+**Claim ID** (a GUID per chunk), the session ID and the time. A second job either waits on the lock and then
+no longer sees those lines as `Pending`, or claims a different set; each line is re-read under the lock
+and only claimed if it is still `Pending`. Processing only touches lines carrying its own Claim ID.
+As a last line of defence, posting (Step 4) re-reads the lines with `UpdLock` and refuses unless they still
+carry this Claim ID, and the "no Posted line for member + period" rule stops a double post even if the
+status logic were bypassed. Claims left by a crashed run (session ended, or older than one hour) are
+released back to `Pending` at the start of the next run.
 
 ### Step 4 – Posting (Part 4)
 
@@ -330,7 +335,15 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 | Penalty base | control total of the batch (what the employer declared) |
 | Penalty timing | posted with the first processed chunk of the batch, flag prevents repeats |
 | GL summary granularity | one pair per scheme per processed chunk of a batch; with batch size 500 and ~40 lines per employer that is one pair per batch |
-| Retry semantics | "Failed more than Max Retry Attempts": Retry Count > Max → Dead Letter |
+| Retry semantics | "Failed more than Max Retry Attempts": Retry Count > Max → Dead Letter. With Max = 3 a line is attempted 4 times (first try + 3 retries). The line goes straight to Dead Letter on the failure that exceeds the limit |
+| Retry timing | Failed lines are requeued at the start of the **next** run, not immediately, so the job queue interval acts as the retry delay |
+| Validation order | employer and scheme first (same for every line, read once per chunk), then member, already-posted, cap; the first failing rule's message is stored |
+| Employer Cap % = 0 | treated as "not set up": lines fail with a clear message instead of being let through uncapped |
+| Scheme G/L accounts missing | the line fails at validation (clear message) rather than failing the whole posting transaction |
+| Same member twice in one file | the second occurrence fails ("appears more than once"); the posted-line check covers earlier batches |
+| Validation vs posting failures | validation failures are committed per line before posting; a posting error rolls back the chunk and every line in it gets the posting error and is retried |
+| Chunks | a chunk never spans two batches, so each GL summary and penalty belongs to exactly one batch |
+| Batch status | Received → In Progress (any line processed, some still open) → Completed, or Completed with Errors if any Dead Letter lines remain |
 | Reprocess | resets Retry Count to 0 |
 | Age rule | age computed on Date Joined, inclusive; limits held in Pension Setup (`Min. Joining Age` 18, `Max. Joining Age` 65) so they can change without a code change – documented in README "Additional fields" |
 | Date of Birth | made required, otherwise the 18–65 rule cannot be enforced |

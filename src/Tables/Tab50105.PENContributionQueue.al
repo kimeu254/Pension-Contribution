@@ -64,6 +64,19 @@ table 50105 "PEN Contribution Queue"
         {
             Caption = 'Last Attempt At';
         }
+        // Claim fields: set when a processing run moves the line to Processing, cleared when it leaves Processing.
+        field(13; "Claim ID"; Guid)
+        {
+            Caption = 'Claim ID';
+        }
+        field(14; "Claimed By Session"; Integer)
+        {
+            Caption = 'Claimed By Session';
+        }
+        field(15; "Claimed At"; DateTime)
+        {
+            Caption = 'Claimed At';
+        }
     }
     keys
     {
@@ -82,5 +95,19 @@ table 50105 "PEN Contribution Queue"
         key(MemberPeriod; "Member No.", Period, Status)
         {
         }
+        // Used by a processing run to find the lines it claimed.
+        key(Claim; "Claim ID", Status)
+        {
+        }
     }
+
+    /// <summary>
+    /// Clears the claim fields when the line leaves Processing.
+    /// </summary>
+    procedure ClearClaim()
+    begin
+        Clear("Claim ID");
+        "Claimed By Session" := 0;
+        "Claimed At" := 0DT;
+    end;
 }

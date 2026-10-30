@@ -71,6 +71,48 @@ page 50100 "PEN Pension Setup"
         }
     }
 
+    actions
+    {
+        area(Processing)
+        {
+            action(ScheduleProcessing)
+            {
+                ApplicationArea = All;
+                Caption = 'Schedule Background Processing';
+                Image = Timesheet;
+                ToolTip = 'Create a recurring job queue entry that processes the contribution queue every minute, or set the existing one to Ready.';
+
+                trigger OnAction()
+                var
+                    QueueProcessor: Codeunit "PEN Queue Processor";
+                begin
+                    QueueProcessor.ScheduleRecurringJob();
+                end;
+            }
+        }
+        area(Navigation)
+        {
+            action(JobQueueEntries)
+            {
+                ApplicationArea = All;
+                Caption = 'Job Queue Entries';
+                Image = JobListSetup;
+                RunObject = page "Job Queue Entries";
+                RunPageLink = "Object Type to Run" = const(Codeunit), "Object ID to Run" = const(50103);
+                ToolTip = 'View the job queue entries that process the contribution queue.';
+            }
+        }
+        area(Promoted)
+        {
+            actionref(ScheduleProcessing_Promoted; ScheduleProcessing)
+            {
+            }
+            actionref(JobQueueEntries_Promoted; JobQueueEntries)
+            {
+            }
+        }
+    }
+
     trigger OnOpenPage()
     begin
         Rec.InsertIfNotExists();

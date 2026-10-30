@@ -30,5 +30,8 @@ permissionset 50100 "PEN ALL"
         codeunit "PEN Install" = X,
         codeunit "PEN Contribution Intake" = X,
         codeunit "PEN JSON Batch Reader" = X,
-        codeunit "PEN CSV Batch Reader" = X;
+        codeunit "PEN CSV Batch Reader" = X,
+        codeunit "PEN Queue Processor" = X,
+        codeunit "PEN Line Validation" = X,
+        codeunit "PEN Contribution Posting" = X;
 }

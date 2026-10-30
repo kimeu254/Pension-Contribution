@@ -70,8 +70,56 @@ page 50108 "PEN Contribution Queue"
         }
     }
 
+    actions
+    {
+        area(Processing)
+        {
+            action(Reprocess)
+            {
+                Caption = 'Reprocess';
+                Image = Restore;
+                ToolTip = 'Reset the selected Failed or Dead Letter lines to Pending with a fresh retry count, so the background process picks them up again. Lines in other statuses are skipped.';
+
+                trigger OnAction()
+                var
+                    SelectedLine: Record "PEN Contribution Queue";
+                    QueueProcessor: Codeunit "PEN Queue Processor";
+                    LinesReset: Integer;
+                begin
+                    CurrPage.SetSelectionFilter(SelectedLine);
+                    LinesReset := QueueProcessor.ReprocessLines(SelectedLine);
+                    Message(LinesResetMsg, LinesReset);
+                    CurrPage.Update(false);
+                end;
+            }
+            action(ProcessNow)
+            {
+                Caption = 'Process Now';
+                Image = Start;
+                ToolTip = 'Start a background run of the contribution queue now instead of waiting for the next scheduled run. You can keep working while it runs.';
+
+                trigger OnAction()
+                var
+                    QueueProcessor: Codeunit "PEN Queue Processor";
+                begin
+                    QueueProcessor.RunOnceInBackground();
+                end;
+            }
+        }
+        area(Promoted)
+        {
+            actionref(Reprocess_Promoted; Reprocess)
+            {
+            }
+            actionref(ProcessNow_Promoted; ProcessNow)
+            {
+            }
+        }
+    }
+
     var
         StatusStyle: Text;
+        LinesResetMsg: Label '%1 line(s) were reset to Pending.', Comment = '%1 = number of lines';
 
     trigger OnAfterGetRecord()
     begin

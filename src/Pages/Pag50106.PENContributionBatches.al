@@ -122,6 +122,19 @@ page 50106 "PEN Contribution Batches"
                     CurrPage.Update(false);
                 end;
             }
+            action(ProcessNow)
+            {
+                Caption = 'Process Now';
+                Image = Start;
+                ToolTip = 'Start a background run of the contribution queue now instead of waiting for the next scheduled run. You can keep working while it runs.';
+
+                trigger OnAction()
+                var
+                    QueueProcessor: Codeunit "PEN Queue Processor";
+                begin
+                    QueueProcessor.RunOnceInBackground();
+                end;
+            }
         }
         area(Navigation)
         {
@@ -138,6 +151,9 @@ page 50106 "PEN Contribution Batches"
         area(Promoted)
         {
             actionref(ImportFile_Promoted; ImportFile)
+            {
+            }
+            actionref(ProcessNow_Promoted; ProcessNow)
             {
             }
             actionref(Lines_Promoted; Lines)
