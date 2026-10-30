@@ -10,8 +10,6 @@ Built for Business Central 2026 release wave 2 (application 29, runtime 18), obj
 |---|---|
 | Extension | `app/` → *Pension Contribution* (`JIMMY MUTISO_Pension Contribution_<version>.app`) |
 | Tests | `test/` → *Pension Contribution Tests* (separate app, IDs 50140–50149) |
-| Design log | [DESIGN.md](DESIGN.md): build plan, object ID plan and every design decision |
-| Test evidence | [TESTING.md](TESTING.md): manual test script per acceptance criterion, with results |
 
 ---
 
@@ -94,8 +92,7 @@ codeunit (`PEN Line Validation`) and posting in one (`PEN Contribution Posting`)
 
 ## 3. Design decisions
 
-Where the brief is silent, these are the decisions made. The complete list is in
-[DESIGN.md §4](DESIGN.md#4-decisions-where-the-brief-is-silent-to-record-in-readme).
+Where the brief is silent, these are the decisions made.
 
 ### Master data
 - **Required fields** are enforced three ways: `NotBlank` stops a field being cleared, `OnInsert`/`OnModify`
@@ -196,7 +193,7 @@ identity) column, so it stays unique when two processes post at the same time.
   entries (5,000 + 5,000), member ledger total 10,000 = G/L credit to Member Liability 10,000, in exactly one
   summarised G/L entry. `LateBatchPostsOnePenalty` asserts exactly one penalty entry of −1,350 on Penalty Income
   for the brief's sample batch, even when processed twice.
-- **In the sandbox** (CRONUS, details in [TESTING.md](TESTING.md)):
+- **In the sandbox** (CRONUS), following each acceptance criterion by hand:
   - the brief's sample batch: member ledger 27,000 = G/L Member Liability credit 27,000, including a line that only
     posted after Reprocess (document no. `-2`); one late penalty of 1,350;
   - the generated data: 2,020 lines processed in one background run of about 10 seconds; 1,968 posted
@@ -285,9 +282,8 @@ Pension Contribution/
 │     ├─ TestData/           test data generator
 │     └─ RoleCenter/         Pension Administrator role center and cues
 ├─ test/                     test app (depends on app)
-├─ samples/                  the brief's sample batch as JSON and CSV, plus a bad control total file
-├─ DESIGN.md                 build plan, object IDs, full decision log
-├─ TESTING.md                manual test script and results
+├─ samples/                  the brief's sample batch as JSON and CSV, a bad control total file, demo batches (JSON late, CSV on time)
+├─ README.md
 └─ Pension Contribution.code-workspace
 ```
 
