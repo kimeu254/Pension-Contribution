@@ -61,6 +61,25 @@ page 50112 "PEN Pension Role Center"
         }
         area(Sections)
         {
+            group(Administration)
+            {
+                Caption = 'Setup';
+
+                action(PensionSetup)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Pension Setup';
+                    RunObject = page "PEN Pension Setup";
+                    ToolTip = 'Set up number series, remittance rules, background processing and test data.';
+                }
+                action(JobQueueEntries)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Job Queue Entries';
+                    RunObject = page "Job Queue Entries";
+                    ToolTip = 'View the background jobs, including the contribution queue processor.';
+                }
+            }
             group(MasterData)
             {
                 Caption = 'Schemes & Members';
@@ -111,25 +130,6 @@ page 50112 "PEN Pension Role Center"
                     Caption = 'Member Ledger Entries';
                     RunObject = page "PEN Member Ledger Entries";
                     ToolTip = 'View the posted employee and employer contributions per member.';
-                }
-            }
-            group(Administration)
-            {
-                Caption = 'Setup';
-
-                action(PensionSetup)
-                {
-                    ApplicationArea = All;
-                    Caption = 'Pension Setup';
-                    RunObject = page "PEN Pension Setup";
-                    ToolTip = 'Set up number series, remittance rules, background processing and test data.';
-                }
-                action(JobQueueEntries)
-                {
-                    ApplicationArea = All;
-                    Caption = 'Job Queue Entries';
-                    RunObject = page "Job Queue Entries";
-                    ToolTip = 'View the background jobs, including the contribution queue processor.';
                 }
             }
         }
