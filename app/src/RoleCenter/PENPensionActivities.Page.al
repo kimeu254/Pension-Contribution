@@ -63,6 +63,14 @@ page 50113 "PEN Pension Activities"
                         RunObject = page "PEN Pension Setup";
                         ToolTip = 'Set up number series, remittance rules, background processing and test data.';
                     }
+                    action(QueueMonitor)
+                    {
+                        ApplicationArea = All;
+                        Caption = 'Queue Monitor';
+                        Image = TileReport;
+                        RunObject = page "PEN Queue Monitor";
+                        ToolTip = 'See lines by status, the last and next background run, and the most common errors.';
+                    }
                     action(GenerateTestData)
                     {
                         ApplicationArea = All;

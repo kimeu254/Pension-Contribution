@@ -74,7 +74,7 @@ Legend: `[x]` done · `[ ]` to do. Details for each step are in section 3.
 - [x] Verify in sandbox: generator + Process Now (2,020 lines in ~10 s), all 5 tests pass in AL Test Tool
 
 **Step 7 – Stretch goals (optional)**
-- [ ] Queue monitor page
+- [x] Queue monitor page: lines by status, last run (start / end / duration / result from the Job Queue Log), schedule (recurring job status, next run), most common errors grouped by pattern
 - [ ] Telemetry (`Session.LogMessage`)
 - [ ] Performance at 20,000 lines (before/after timings)
 - [ ] API page intake
@@ -120,7 +120,7 @@ Pension Contribution/
 │     ├─ Setup/              Pension Setup table + page, Install codeunit, permission set
 │     ├─ MasterData/         Scheme, Employer, Member tables, pages and status enums
 │     ├─ Intake/             Contribution Batch + Queue, intake codeunit, JSON/CSV readers, pages
-│     ├─ Processing/         Queue Processor (Job Queue), Line Validation
+│     ├─ Processing/         Queue Processor (Job Queue), Line Validation, Queue Monitor + error summary
 │     ├─ Posting/            Contribution Posting, Member Ledger Entry table/page/enum
 │     ├─ Statement/          Member Statement report + its .rdlc layout
 │     ├─ TestData/           test data generator + its dialog page
@@ -158,7 +158,8 @@ tests use 50140–50149 to avoid collisions.
 | Table | 50105 | PEN Contribution Queue | |
 | Table | 50106 | PEN Member Ledger Entry | |
 | Table | 50107 | PEN API Intake Buffer (stretch) | |
-| Table | 50108 | PEN Pension Cue (role center cues) | |
+| Table | 50108 | PEN Pension Cue (role center cues, also the Queue Monitor's counts) | |
+| Table | 50109 | PEN Error Summary Buffer (temporary, Queue Monitor) | |
 | Page | 50100 | PEN Pension Setup (card) | |
 | Page | 50101 | PEN Schemes (list) | |
 | Page | 50102 | PEN Employer List | |
@@ -169,10 +170,11 @@ tests use 50140–50149 to avoid collisions.
 | Page | 50107 | PEN Generate Test Data (dialog for the generator; no batch card is needed) | |
 | Page | 50108 | PEN Contribution Queue (list, Reprocess action in Step 3) | |
 | Page | 50109 | PEN Member Ledger Entries | |
-| Page | 50110 | PEN Queue Monitor (stretch) | |
+| Page | 50110 | PEN Queue Monitor | |
 | Page | 50111 | PEN Contribution API (stretch) | |
 | Page | 50112 | PEN Pension Role Center | |
 | Page | 50113 | PEN Pension Activities (cues) | |
+| Page | 50114 | PEN Queue Error Summary (list part of the Queue Monitor) | |
 | Codeunit | 50100 | PEN Contribution Intake | |
 | Codeunit | 50101 | PEN JSON Batch Reader | |
 | Codeunit | 50102 | PEN CSV Batch Reader | |
@@ -403,6 +405,7 @@ README (from this file), compiled `.app`, zipped source, and a walkthrough scrip
 | Late Penalty % default | 5% on install (brief gives no value; needed for the sample's late batch to post a penalty) |
 | Posting date | last day of the contribution period |
 | Tests | separate test app in `test/`, IDs 50140–50149 (the AL compiler includes every .al file under a project folder, so the test app cannot sit inside the main app's folder). No dependency on Microsoft test libraries: the test library has its own small asserts |
+| Most common errors | error texts contain member numbers and amounts, so they are grouped by pattern: every run of digits becomes `#` ("Member MEM# is not active (status Exited)."); computed on demand from Failed + Dead Letter lines into a temporary table, so nothing extra is stored |
 | asserterror in tests | `asserterror` rolls back the whole open transaction, so the duplicate-message test commits the first batch before it; the test runner's isolation still rolls everything back at the end of the test |
 | Test isolation | each test creates its own scheme, G/L accounts, employer and members with random unique keys, and processes only its own batch (`PEN Queue Processor.SetBatchFilter`), so tests ignore other data in the company |
 | Generator data | master data is found again by KRA PIN (`P000000001G`…) and National ID (`GEN0000100001`…), so re-running for another period reuses employers and members and only adds batches; batches use message ID `GEN-<employer>-<period>`, so re-running the same period skips them. Bad lines rotate per employer: over the cap (employer 10% vs 7.5% cap), inactive (exited) member, member of another employer. Generated G/L accounts: `PEN-RECV`, `PEN-LIAB`, `PEN-PENALTY`; scheme `GEN` |

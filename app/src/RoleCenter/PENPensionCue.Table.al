@@ -40,6 +40,13 @@ table 50108 "PEN Pension Cue"
             CalcFormula = count("PEN Contribution Queue" where(Status = const("Dead Letter")));
             Editable = false;
         }
+        field(14; "Posted Lines"; Integer)
+        {
+            Caption = 'Posted Lines';
+            FieldClass = FlowField;
+            CalcFormula = count("PEN Contribution Queue" where(Status = const(Posted)));
+            Editable = false;
+        }
         field(20; "Open Batches"; Integer)
         {
             Caption = 'Open Batches';

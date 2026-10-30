@@ -138,6 +138,13 @@ page 50112 "PEN Pension Role Center"
                     RunObject = page "PEN Member Ledger Entries";
                     ToolTip = 'View the posted employee and employer contributions per member.';
                 }
+                action(QueueMonitor)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Queue Monitor';
+                    RunObject = page "PEN Queue Monitor";
+                    ToolTip = 'See lines by status, the last and next background run, and the most common errors.';
+                }
             }
         }
         area(Creation)

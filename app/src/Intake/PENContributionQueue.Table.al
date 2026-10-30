@@ -103,6 +103,10 @@ table 50105 "PEN Contribution Queue"
         key(Claim; "Claim ID", Status)
         {
         }
+        // Used by the Queue Monitor to find when a line was last processed.
+        key(LastAttempt; "Last Attempt At")
+        {
+        }
     }
 
     /// <summary>
