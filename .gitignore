@@ -20,3 +20,6 @@ rad.json
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Presenter notes (kept locally, not shared)
+WALKTHROUGH.md
