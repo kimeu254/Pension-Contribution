@@ -200,6 +200,32 @@ table 50103 "PEN Member"
         end;
     end;
 
+    /// <summary>
+    /// Fills Employer No. (and so Scheme Code) when the record is filtered to one employer, for example a new member
+    /// created from the Members action on the employer card. Filters set by a page link live in other filter groups.
+    /// </summary>
+    procedure SetEmployerFromFilter()
+    var
+        EmployerNo: Code[20];
+        OriginalFilterGroup: Integer;
+        FilterGroupNo: Integer;
+    begin
+        OriginalFilterGroup := FilterGroup();
+        EmployerNo := '';
+        FilterGroupNo := 0;
+        repeat
+            FilterGroup(FilterGroupNo);
+            if GetFilter("Employer No.") <> '' then
+                if GetRangeMin("Employer No.") = GetRangeMax("Employer No.") then
+                    EmployerNo := GetRangeMin("Employer No.");
+            FilterGroupNo += 1;
+        until (EmployerNo <> '') or (FilterGroupNo > 4);
+        FilterGroup(OriginalFilterGroup);
+
+        if EmployerNo <> '' then
+            Validate("Employer No.", EmployerNo);
+    end;
+
     procedure GetFullName(): Text
     begin
         exit(DelChr("First Name" + ' ' + "Last Name", '<>', ' '));

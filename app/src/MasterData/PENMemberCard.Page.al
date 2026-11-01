@@ -134,4 +134,9 @@ page 50105 "PEN Member Card"
             }
         }
     }
+
+    trigger OnNewRecord(BelowxRec: Boolean)
+    begin
+        Rec.SetEmployerFromFilter();
+    end;
 }
